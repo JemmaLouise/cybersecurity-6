@@ -6,6 +6,6 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 HOST = "localhost"
-USER = "root"
-PASSWORD = "p0psicl3"
-DATABASE = 'movies'
+USER = "USER"
+PASSWORD = "PASSWORD"
+DATABASE = "movies"
