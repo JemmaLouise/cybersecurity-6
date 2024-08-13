@@ -5,6 +5,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///movies.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+# make sure to add in your own details for MySQL
 HOST = "localhost"
 USER = "USER"
 PASSWORD = "PASSWORD"
