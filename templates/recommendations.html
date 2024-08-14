@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Movie Recommendations</title>
+</head>
+<body>
+    <h1>Movie Recommendations</h1>
+    <ul>
+        {% if recommendations['results'] %}
+            {% for movie in recommendations['results'] %}
+                <li>{{ movie['title'] }} ({{ movie['release_date'] }})</li>
+            {% endfor %}
+        {% else %}
+            <li>No recommendations found for this movie.</li>
+        {% endif %}
+    </ul>
+    <a href="{{ url_for('home') }}">Back to Home</a>
+</body>
+</html>
