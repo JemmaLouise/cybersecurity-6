@@ -12,16 +12,16 @@ class User(db.Model, UserMixin):
 
 
 class UserPreferences(db.Model):
-    __tablename__ = 'user_preferences'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Fix foreign key reference
     genre_id = db.Column(db.Integer)
     min_rating = db.Column(db.Numeric(3, 1))
-    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
+    date_created = db.Column(db.TIMESTAMP, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+    movie_ratings = db.Column(db.JSON, default={})  # JSON column for storing movie ratings
+
+    # Define relationship to User
     user = db.relationship('User', backref=db.backref('preferences', lazy=True))
 
-
-# Flask-Login requires the following properties (found from website)
     @property
     def is_authenticated(self):
         return True

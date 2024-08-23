@@ -1,14 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Movie Recommendations</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Movie Recommendations{% endblock %}
+
+{% block content %}
     <h1>Movie Recommendations</h1>
     <ul>
-        {% if recommendations['results'] %}
-            {% for movie in recommendations['results'] %}
+        {% if recommendations %}
+            {% for movie in recommendations %}
                 <li>{{ movie['title'] }} ({{ movie['release_date'] }})</li>
             {% endfor %}
         {% else %}
@@ -16,5 +14,4 @@
         {% endif %}
     </ul>
     <a href="{{ url_for('home') }}">Back to Home</a>
-</body>
-</html>
+{% endblock %}

@@ -1,43 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set Preferences</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Set Preferences{% endblock %}
+
+{% block content %}
     <h1>Set Your Movie Preferences</h1>
-    <form method="POST" action="{{ url_for('set_preference') }}">
+    <form method="POST" action="{{ url_for('set_preferences') }}">
         <label for="genre_id">Select Genre:</label>
         <select name="genre_id" id="genre_id" required>
-            <option value="">--Select Genre--</option>
-            <option value="28">Action</option>
-            <option value="12">Adventure</option>
-            <option value="16">Animation</option>
-            <option value="35">Comedy</option>
-            <option value="80">Crime</option>
-            <option value="99">Documentary</option>
-            <option value="18">Drama</option>
-            <option value="10751">Family</option>
-            <option value="14">Fantasy</option>
-            <option value="36">History</option>
-            <option value="27">Horror</option>
-            <option value="10402">Music</option>
-            <option value="9648">Mystery</option>
-            <option value="10749">Romance</option>
-            <option value="10770">Science Fiction</option>
-            <option value="10770">TV Movie</option>
-            <option value="53">Thriller</option>
-            <option value="10752">War</option>
-            <option value="37">Western</option>
-            <!-- Add more genres and their IDs as needed -->
+            <option value="" disabled>Select a genre</option>
+            <option value="28" {% if user_pref and user_pref.genre_id == "28" %}selected{% endif %}>Action</option>
+            <option value="12" {% if user_pref and user_pref.genre_id == "12" %}selected{% endif %}>Adventure</option>
+            <option value="16" {% if user_pref and user_pref.genre_id == "16" %}selected{% endif %}>Animation</option>
+            <option value="35" {% if user_pref and user_pref.genre_id == "35" %}selected{% endif %}>Comedy</option>
+            <option value="80" {% if user_pref and user_pref.genre_id == "80" %}selected{% endif %}>Crime</option>
+            <option value="99" {% if user_pref and user_pref.genre_id == "99" %}selected{% endif %}>Documentary</option>
+            <option value="18" {% if user_pref and user_pref.genre_id == "18" %}selected{% endif %}>Drama</option>
+            <option value="10751" {% if user_pref and user_pref.genre_id == "10751" %}selected{% endif %}>Family</option>
+            <option value="14" {% if user_pref and user_pref.genre_id == "14" %}selected{% endif %}>Fantasy</option>
+            <option value="36" {% if user_pref and user_pref.genre_id == "36" %}selected{% endif %}>History</option>
+            <option value="27" {% if user_pref and user_pref.genre_id == "27" %}selected{% endif %}>Horror</option>
+            <option value="10402" {% if user_pref and user_pref.genre_id == "10402" %}selected{% endif %}>Music</option>
+            <option value="9648" {% if user_pref and user_pref.genre_id == "9648" %}selected{% endif %}>Mystery</option>
+            <option value="10749" {% if user_pref and user_pref.genre_id == "10749" %}selected{% endif %}>Romance</option>
+            <option value="10770" {% if user_pref and user_pref.genre_id == "10770" %}selected{% endif %}>Science Fiction</option>
+            <option value="53" {% if user_pref and user_pref.genre_id == "53" %}selected{% endif %}>Thriller</option>
+            <option value="10752" {% if user_pref and user_pref.genre_id == "10752" %}selected{% endif %}>War</option>
+            <option value="37" {% if user_pref and user_pref.genre_id == "37" %}selected{% endif %}>Western</option>
         </select>
         <br><br>
         <label for="min_rating">Minimum Rating (0-10):</label>
-        <input type="number" id="min_rating" name="min_rating" min="0" max="10" step="0.1" required>
+        <input type="number" id="min_rating" name="min_rating" min="0" max="10" step="0.1" value="{{ user_pref.min_rating if user_pref else '' }}" required>
         <br><br>
         <button type="submit">Save Preferences</button>
     </form>
+    <a href="{{ url_for('profile') }}">Back to Profile</a>
     <a href="{{ url_for('home') }}">Back to Home</a>
-</body>
-</html>
+{% endblock %}

@@ -1,15 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Login</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Login - ScreenSort{% endblock %}
+
+{% block content %}
     <h1>Login</h1>
     <form method="POST">
         {{ form.hidden_tag() }}
-        {{ form.email.label }} {{ form.email() }}<br>
-        {{ form.password.label }} {{ form.password() }}<br>
-        {{ form.submit() }}
+        <div>
+            {{ form.email.label }} {{ form.email() }}
+        </div>
+        <div>
+            {{ form.password.label }} {{ form.password() }}
+        </div>
+        <div>
+            {{ form.submit() }}
+        </div>
     </form>
-</body>
-</html>
+    <a href="{{ url_for('home') }}">Back to Home</a>
+{% endblock %}

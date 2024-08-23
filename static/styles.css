@@ -1,0 +1,162 @@
+/* Basic reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #333; /* Dark grey background */
+    color: #fff; /* White text */
+    margin: 0;
+    padding: 0;
+}
+
+/* Header Styles */
+header {
+    background-color: #222; /* Slightly darker grey for the header */
+    padding: 10px 20px;
+    color: #fff; /* White text */
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+header .banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header .banner h1 {
+    margin: 0;
+    font-size: 1.8em;
+}
+
+header nav {
+    display: flex;
+    gap: 20px;
+}
+
+header nav a {
+    color: #fff; /* White text */
+    text-decoration: none;
+    font-weight: bold; /* Bold text */
+}
+
+header nav a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
+/* Main Content Styles */
+main {
+    padding: 60px 20px 20px; /* Add top padding to avoid overlap with the fixed header */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #f00; /* Red headings */
+}
+
+/* Form Styles */
+form {
+    max-width: 600px;
+    margin: 20px auto;
+    background: #444; /* Dark grey form background */
+    padding: 20px;
+    border-radius: 8px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #fff; /* White text for labels */
+}
+
+form input, form select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #555; /* Grey border */
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+form button {
+    background: #007bff; /* Blue button background */
+    color: #fff; /* White text */
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background: #0056b3; /* Darker blue on hover */
+}
+
+/* Footer Styles */
+footer {
+    background: #222; /* Dark grey background */
+    padding: 10px;
+    text-align: center;
+    color: #fff; /* White text */
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+/* styles.css */
+
+/* Container for horizontal scrolling */
+.movies-container {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 20px;
+    background-color: #333; /* Dark grey background */
+}
+
+/* Each movie card */
+.movie-card {
+    display: inline-block;
+    width: 300px; /* Fixed width to accommodate larger posters horizontally */
+    margin-right: 20px;
+    background-color: #444; /* Slightly lighter grey for the card */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    color: #fff; /* White text color */
+}
+
+/* Movie poster */
+.movie-card img {
+    width: 100%; /* Fill the card width */
+    height: auto; /* Maintain aspect ratio */
+    border-bottom: 2px solid #555; /* Divider between poster and details */
+}
+
+/* Movie details */
+.movie-details {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.age-rating {
+    font-size: 0.9em;
+    background-color: #666; /* Grey background for the age rating */
+    border-radius: 5px;
+    padding: 3px 5px;
+}
+
+.user-rating {
+    font-size: 0.9em;
+    background-color: #555; /* Slightly darker grey for the rating */
+    border-radius: 5px;
+    padding: 3px 5px;
+}
+

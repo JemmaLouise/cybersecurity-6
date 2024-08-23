@@ -1,14 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Movies by Rating</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Movies by Rating{% endblock %}
+
+{% block content %}
     <h1>Movies with a Rating of {{ min_rating }} or Higher</h1>
     <ul>
-        {% if movies['results'] %}
-            {% for movie in movies['results'] %}
+        {% if movies %}
+            {% for movie in movies %}
                 <li>{{ movie['title'] }} ({{ movie['release_date'] }}) - Rating: {{ movie['vote_average'] }}</li>
             {% endfor %}
         {% else %}
@@ -16,5 +14,4 @@
         {% endif %}
     </ul>
     <a href="{{ url_for('home') }}">Back to Home</a>
-</body>
-</html>
+{% endblock %}
