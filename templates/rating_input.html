@@ -1,16 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Filter Movies by Rating</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Filter Movies by Rating{% endblock %}
+
+{% block content %}
     <h1>Filter Movies by Rating</h1>
-    <form method="POST">
+    <form method="POST" action="{{ url_for('movies_by_rating') }}">
         <label for="min_rating">Enter Minimum Rating (0-10):</label>
         <input type="number" id="min_rating" name="min_rating" step="0.1" min="0" max="10" required>
         <button type="submit">Submit</button>
     </form>
     <a href="{{ url_for('home') }}">Back to Home</a>
-</body>
-</html>
+{% endblock %}

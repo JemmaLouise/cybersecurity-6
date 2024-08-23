@@ -1,58 +1,86 @@
-# Make sure you have all these downloaded to python to run the programme on your end
-from flask import Flask, render_template, url_for, flash, redirect, request, jsonify
-from config import Config
-from db_utils import _connect_to_db
-from forms import RegistrationForm, LoginForm
-from flask_login import LoginManager, login_user, current_user, logout_user, login_required
+from flask import Flask, render_template, request, redirect, url_for, flash, current_app
+from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from tmdb_utils import get_trending_movies, get_movie_recommendations, get_movies_by_genre, get_movies_by_rating
+from config import Config
 from models import db, User, UserPreferences
-import requests
+from tmdb_utils import get_trending_movies, get_movie_recommendations, get_movies_by_genre, get_movies_by_rating
+from forms import RegistrationForm, LoginForm
 
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
 db.init_app(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+login_manager.login_message_category = 'info'
 
-TMDB_API_KEY = '5691975e0ec0ebc572e6952891fa1124'
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
-# Current home page, requires users to log in to use - not an option to create an account
-# When logged in, shows a list of currently trending movies but this can be altered
+
 @app.route('/')
 @app.route('/home')
 @login_required
 def home():
+    print("TMDB API Key:", current_app.config['TMDB_API_KEY'])  # For debugging
+
+    # Fetch the user's disliked movies from preferences
+    user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+    disliked_movies = set()
+    if user_pref and user_pref.movie_ratings:
+        disliked_movies = set(int(movie_id) for movie_id, rating in user_pref.movie_ratings.items() if rating == 'thumbs_down')
+
+    # Fetch trending movies
     trending_movies = get_trending_movies()
+
+    # Filter out disliked movies
+    trending_movies = [movie for movie in trending_movies if movie['id'] not in disliked_movies]
+
+    print(trending_movies)  # Print the result for debugging
     return render_template('home.html', trending_movies=trending_movies)
 
 
-# User registration set up with additions to help with debugging as I was having issues with it originally
+
+
+@app.route('/thumbs_action', methods=['POST'])
+@login_required
+def thumbs_action():
+    movie_id = int(request.form.get('movie_id'))
+    action = request.form.get('action')
+
+    user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+
+    if action == 'thumbs_down':
+        # Update movie ratings in the JSON column
+        if user_pref:
+            movie_ratings = user_pref.movie_ratings or {}
+            movie_ratings[str(movie_id)] = 'thumbs_down'
+            user_pref.movie_ratings = movie_ratings
+            db.session.commit()
+            flash(f'You disliked movie with ID {movie_id}. It has been recorded.', 'info')
+
+    return redirect(url_for('home'))
+
+
+
+
+
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
-
-    if request.method == 'POST':
-        print("Form submitted")  # Check if the form is being submitted
-
     if form.validate_on_submit():
-        print("Form validated")  # Check if the form passes validation
         hashed_password = generate_password_hash(form.password.data)
         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
         flash('Account created for you!', 'success')
         return redirect(url_for('login'))
-    else:
-        print("Form did not validate")  # Notify that validation failed
-        print(form.errors)  # Print the form errors to the console
-
     return render_template('register.html', form=form)
 
-
-# Endpoint for users to login, required to see any of the other pages
-# Don't think we want there to be a guest option but let me know if so
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -63,41 +91,39 @@ def login():
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
             return redirect(url_for('home'))
-        else:
-            flash('Login Unsuccessful. Please check email and password', 'danger')
+        flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', form=form)
 
-
-# Users use drop down list to pick 1 genre and min film rating (1-10) to save in a SQL table
-# Would be better if they can select multiple genres
 @app.route('/set_preferences', methods=['GET', 'POST'])
 @login_required
-def set_preference():
+def set_preferences():
     if request.method == 'POST':
         genre_id = request.form.get('genre_id')
         min_rating = request.form.get('min_rating')
-        if not genre_id or not min_rating:
+
+        if genre_id and min_rating:
+            user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+            if user_pref:
+                user_pref.genre_id = genre_id
+                user_pref.min_rating = min_rating
+            else:
+                user_pref = UserPreferences(user_id=current_user.id, genre_id=genre_id, min_rating=min_rating)
+                db.session.add(user_pref)
+            db.session.commit()
+            flash('Preferences updated successfully!', 'success')
+        else:
             flash('Please fill in all fields.', 'warning')
-            return redirect(url_for('set_preferences'))
 
-        # Save the user preferences
-        user_pref = UserPreferences(user_id=current_user.id, genre_id=genre_id, min_rating=min_rating)
-        db.session.add(user_pref)
-        db.session.commit()
-        flash('Your preferences have been saved!', 'success')
-        return redirect(url_for('home'))
+    user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+    return render_template('set_preferences.html', user_pref=user_pref)
 
-    # Render the preference form if GET request
-    return render_template('set_preferences.html')
 
-# Needs work with machine learning/ data scientist to give accurate recommendations but the endpoint is created
 @app.route('/recommendations/<int:movie_id>')
 @login_required
 def recommendations(movie_id):
     recommendations = get_movie_recommendations(movie_id)
     return render_template('recommendations.html', recommendations=recommendations)
 
-# Shows top trending movies in that genre
 @app.route('/movies_by_genre', methods=['GET', 'POST'])
 @login_required
 def movies_by_genre():
@@ -106,34 +132,72 @@ def movies_by_genre():
         if not genre_id:
             flash('Please select a genre.', 'warning')
             return redirect(url_for('movies_by_genre'))
-
-        try:
-            url = f'https://api.themoviedb.org/3/discover/movie?api_key={TMDB_API_KEY}&with_genres={genre_id}'
-            response = requests.get(url)
-            response.raise_for_status()  # Raises HTTPError for bad responses
-            movies = response.json()
-        except requests.exceptions.RequestException as e:
-            flash(f'Error fetching movies: {e}', 'danger')
-            return redirect(url_for('movies_by_genre'))
-
+        movies = get_movies_by_genre(genre_id)
         return render_template('movies_by_genre.html', movies=movies)
-
     return render_template('genre_input.html')
 
-# Shows top trending movies with a minimum rating between 1-10
 @app.route('/movies_by_rating', methods=['GET', 'POST'])
 @login_required
 def movies_by_rating():
     if request.method == 'POST':
         min_rating = request.form.get('min_rating')
-        url = f'https://api.themoviedb.org/3/discover/movie?api_key={TMDB_API_KEY}&vote_average.gte={min_rating}'
-        response = requests.get(url)
-        movies = response.json()
-        return render_template('movies_by_rating.html', movies=movies, min_rating=min_rating)
+        if min_rating:
+            try:
+                min_rating = float(min_rating)  # Ensure it is a number
+            except ValueError:
+                flash('Invalid rating value', 'danger')
+                return redirect(url_for('movies_by_rating'))
+            movies = get_movies_by_rating(min_rating)
+            return render_template('movies_by_rating.html', movies=movies, min_rating=min_rating)
+        flash('Please provide a rating.', 'warning')
+        return redirect(url_for('movies_by_rating'))
     return render_template('rating_input.html')
 
 
-# Endpoint just for me to test the database is connected
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+
+@app.route('/categories')
+def categories():
+    return render_template('categories.html')
+
+
+@app.route('/profile')
+@login_required
+def profile():
+    # Fetch the user's current preferences
+    user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+
+    # Determine the genre name based on the genre_id
+    genre_names = {
+        "28": "Action",
+        "12": "Adventure",
+        "16": "Animation",
+        "35": "Comedy",
+        "80": "Crime",
+        "99": "Documentary",
+        "18": "Drama",
+        "10751": "Family",
+        "14": "Fantasy",
+        "36": "History",
+        "27": "Horror",
+        "10402": "Music",
+        "9648": "Mystery",
+        "10749": "Romance",
+        "10770": "Science Fiction",
+        "53": "Thriller",
+        "10752": "War",
+        "37": "Western"
+    }
+
+    # Get the genre name or default to 'Not Set'
+    preferred_genre_name = genre_names.get(user_pref.genre_id, 'Not Set') if user_pref else 'Not Set'
+
+    return render_template('profile.html', user_pref=user_pref, preferred_genre_name=preferred_genre_name)
+
+
 @app.route('/test_db')
 def test_db():
     try:
@@ -142,35 +206,14 @@ def test_db():
     except Exception as e:
         return f"Database connection failed: {str(e)}"
 
-
-# endpoint to allow users to log out
 @app.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('login'))
+    return render_template('logout.html')
 
-# Endpoint to see all users so don't have to go to MySQL
-@app.route('/users')
-@login_required
-def users():
-    connection = _connect_to_db()
-    cursor = connection.cursor(dictionary=True)
-
-    query = "SELECT * FROM users"
-    cursor.execute(query)
-    result = cursor.fetchall()
-
-    cursor.close()
-    connection.close()
-
-    return jsonify(result)
-
-
-# Ensures users are logged in
-@login_manager.user_loader
+@app.route('/load_user/<int:user_id>')
 def load_user(user_id):
     return User.query.get(int(user_id))
-
 
 if __name__ == '__main__':
     app.run(debug=True)

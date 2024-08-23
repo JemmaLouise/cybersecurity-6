@@ -1,15 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Trending Movies</title>
-</head>
-<body>
-    <h1>Trending Movies</h1>
-    <ul>
-        {% for movie in trending_movies['results'] %}
-            <li>{{ movie['title'] }} ({{ movie['release_date'] }})</li>
+{% extends "base.html" %}
+
+{% block title %}Home - ScreenSort{% endblock %}
+
+{% block content %}
+    <h2>Welcome to ScreenSort</h2>
+    <p class="welcome-text">ScreenSort is a powerful recommendation API...</p>
+
+    <div class="movies-container">
+        {% for movie in trending_movies %}
+            <div class="movie-card">
+                <h3>{{ movie['title'] }}</h3>
+                <img src="https://image.tmdb.org/t/p/w500{{ movie['poster_path'] }}" alt="{{ movie['title'] }} Poster">
+                <div class="movie-details">
+                    <span class="age-rating">{{ movie['age_rating'] }}</span>
+                    <span class="user-rating">{{ movie['vote_average'] }}/10</span>
+                </div>
+                <form method="POST" action="{{ url_for('thumbs_action') }}">
+                    <input type="hidden" name="movie_id" value="{{ movie['id'] }}">
+                    <button type="submit" name="action" value="thumbs_up">👍</button>
+                    <button type="submit" name="action" value="thumbs_down">👎</button>
+                </form>
+            </div>
+        {% else %}
+            <p>No trending movies found.</p>
         {% endfor %}
-    </ul>
-</body>
-</html>
+    </div>
+{% endblock %}

@@ -1,20 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Movies by Genre</title>
-</head>
-<body>
-    <h1>Movies in this Genre</h1>
+{% extends "base.html" %}
+
+{% block title %}Movies by Genre - ScreenSort{% endblock %}
+
+{% block content %}
+    <h1>Movies in the Selected Genre</h1>
     <ul>
-        {% if movies['results'] %}
-            {% for movie in movies['results'] %}
-                <li>{{ movie['title'] }} ({{ movie['release_date'] }})</li>
+        {% if movies %}
+            {% for movie in movies %}
+                <li>{{ movie['title'] }} ({{ movie['release_date'] }}) - Rating: {{ movie['vote_average'] }}</li>
+            {% else %}
+                <li>No movies found for this genre.</li>
             {% endfor %}
         {% else %}
             <li>No movies found for this genre.</li>
         {% endif %}
     </ul>
     <a href="{{ url_for('home') }}">Back to Home</a>
-</body>
-</html>
+{% endblock %}

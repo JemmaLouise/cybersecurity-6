@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Categories - ScreenSort{% endblock %}
+
+{% block content %}
+    <h2>Categories</h2>
+    <div class="category-links">
+        <a href="{{ url_for('movies_by_genre') }}">
+            <img src="{{ url_for('static', filename='images/genre.png') }}" alt="Movies by Genre">
+            <p>Movies by Genre</p>
+        </a>
+        <a href="{{ url_for('movies_by_rating') }}">
+            <img src="{{ url_for('static', filename='images/rating.png') }}" alt="Movies by Rating">
+            <p>Movies by Rating</p>
+        </a>
+    </div>
+{% endblock %}

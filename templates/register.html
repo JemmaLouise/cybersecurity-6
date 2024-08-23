@@ -1,17 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Register</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
     <h1>Register</h1>
     <form method="POST">
         {{ form.hidden_tag() }}
-        {{ form.username.label }} {{ form.username() }}<br>
-        {{ form.email.label }} {{ form.email() }}<br>
-        {{ form.password.label }} {{ form.password() }}<br>
-        {{ form.confirm_password.label }} {{ form.confirm_password() }}<br>
-        {{ form.submit() }}
+        <div>
+            {{ form.username.label }} {{ form.username() }}
+        </div>
+        <div>
+            {{ form.email.label }} {{ form.email() }}
+        </div>
+        <div>
+            {{ form.password.label }} {{ form.password() }}
+        </div>
+        <div>
+            {{ form.confirm_password.label }} {{ form.confirm_password() }}
+        </div>
+        <div>
+            {{ form.submit() }}
+        </div>
     </form>
-</body>
-</html>
+    <a href="{{ url_for('login') }}">Already have an account? Login here.</a>
+{% endblock %}
