@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Select Age Rating - ScreenSort{% endblock %}
+
+{% block content %}
+    <h1>Select Age Rating to See Movies</h1>
+    <form method="POST" action="{{ url_for('movies_by_age') }}">
+        <label for="age_rating">Select Age Rating:</label>
+        <select name="age_rating" id="age_rating">
+            <option value="">--Select Age Rating--</option>
+            <option value="U">U (Universal)</option>
+            <option value="PG">PG (Parental Guidance)</option>
+            <option value="12">12 (Suitable for 12 and over)</option>
+            <option value="12A">12A (Cinema release suitable for 12 and over)</option>
+            <option value="15">15 (Suitable only for 15 and over)</option>
+            <option value="18">18 (Suitable only for adults)</option>
+        </select>
+        <button type="submit">Submit</button>
+    </form>
+    <a href="{{ url_for('home') }}">Back to Home</a>
+{% endblock %}

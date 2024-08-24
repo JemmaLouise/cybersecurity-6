@@ -47,19 +47,35 @@ def get_movies_by_genre(genre_id):
         'with_genres': genre_id
     }
     try:
+        # Fetch movies by genre
         response = requests.get(url, params=params)
         response.raise_for_status()
         data = response.json()
-        print(data)  # For debugging the entire response
         results = data.get('results', [])
-        if not results:
+
+        # Fetch additional details for each movie
+        detailed_movies = []
+        for movie in results:
+            movie_id = movie['id']
+            details_url = f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&append_to_response=releases'
+            details_response = requests.get(details_url)
+            details_response.raise_for_status()
+            movie_details = details_response.json()
+            # Extract age rating
+            age_rating = next(
+                (country['certification'] for country in movie_details.get('releases', {}).get('countries', []) if
+                 country['iso_3166_1'] == 'US'),
+                'N/A'
+            )
+            movie['age_rating'] = age_rating
+            detailed_movies.append(movie)
+
+        if not detailed_movies:
             print(f"No movies found for genre_id: {genre_id}")
-        return results
+        return detailed_movies
     except requests.exceptions.RequestException as e:
         print(f"Error fetching movies by genre: {e}")
         return []
-
-
 
 
 def get_movies_by_rating(min_rating):
@@ -71,17 +87,62 @@ def get_movies_by_rating(min_rating):
         'vote_average.gte': min_rating
     }
     try:
+        # Fetch movies by rating
         response = requests.get(url, params=params)
         response.raise_for_status()
         data = response.json()
-        print(data)  # For debugging the entire response
         results = data.get('results', [])
-        if not results:
+
+        # Fetch additional details for each movie
+        detailed_movies = []
+        for movie in results:
+            movie_id = movie['id']
+            details_url = f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&append_to_response=releases'
+            details_response = requests.get(details_url)
+            details_response.raise_for_status()
+            movie_details = details_response.json()
+            # Extract age rating
+            age_rating = next(
+                (country['certification'] for country in movie_details.get('releases', {}).get('countries', []) if
+                 country['iso_3166_1'] == 'US'),
+                'N/A'
+            )
+            movie['age_rating'] = age_rating
+            detailed_movies.append(movie)
+
+        if not detailed_movies:
             print(f"No movies found with rating >= {min_rating}")
-        return results
+        return detailed_movies
     except requests.exceptions.RequestException as e:
         print(f"Error fetching movies by rating: {e}")
         return []
+
+
+
+def get_movies_by_age(age_rating):
+    url = 'https://api.themoviedb.org/3/discover/movie'
+    api_key = current_app.config['TMDB_API_KEY']
+    print(f"Using API Key: {api_key}")  # Debugging line
+
+    params = {
+        'api_key': api_key,
+        'certification_country': 'GB',
+        'certification': age_rating
+    }
+
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+        print(data)  # For debugging the response
+        results = data.get('results', [])
+        if not results:
+            print(f"No movies found with age rating {age_rating}")
+        return results
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching movies by age rating: {e}")
+        return []
+
 
 
 def get_trending_movies():
@@ -116,4 +177,5 @@ def get_trending_movies():
     except requests.exceptions.RequestException as e:
         print(f"Error fetching trending movies: {e}")
         return []
+
 

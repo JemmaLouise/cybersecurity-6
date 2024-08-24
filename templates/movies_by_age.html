@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Movies by Age Rating{% endblock %}
+
+{% block content %}
+    <h2>Movies with Age Rating: {{ age_rating }}</h2>
+    <div class="movies-container">
+        {% for movie in movies %}
+            <div class="movie-card">
+                <h3>{{ movie['title'] }}</h3>
+                <img src="https://image.tmdb.org/t/p/w500{{ movie['poster_path'] }}" alt="{{ movie['title'] }} Poster">
+                <div class="movie-details">
+                    <span class="age-rating">{{ movie['age_rating'] }}</span>
+                    <span class="user-rating">{{ movie['vote_average'] }}/10</span>
+                </div>
+                <form method="POST" action="{{ url_for('thumbs_action') }}">
+                    <input type="hidden" name="movie_id" value="{{ movie['id'] }}">
+                    <button type="submit" name="action" value="thumbs_up">👍</button>
+                    <button type="submit" name="action" value="thumbs_down">👎</button>
+                </form>
+            </div>
+        {% else %}
+            <p>No movies found with the age rating "{{ age_rating }}".</p>
+        {% endfor %}
+    </div>
+{% endblock %}
