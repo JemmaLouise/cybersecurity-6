@@ -1,6 +1,6 @@
 # Movie Recommendation System
 ## Overview
-The Movie Recommendation System is a Python-based application that provides personalised movie suggestions to users based on their viewing history and preferences. The system utilizes data from The Movie Database (TMDb) API and incorporates machine learning techniques to recommend movies that align with user tastes.
+ScreenSort, A Movie Recommendation System, is a Python-based application that provides personalised movie suggestions to users based on their viewing history and preferences. The system utilizes data from The Movie Database (TMDb) API and incorporates machine learning techniques to recommend movies that align with user tastes.
 
 ## Features
 - User Authentication and Profile Management: Users can sign up, log in, and manage their profiles, including setting preferences and maintaining a watch history.
