@@ -17,7 +17,8 @@ class UserPreferences(db.Model):
     genre_id = db.Column(db.Integer)
     min_rating = db.Column(db.Numeric(3, 1))
     date_created = db.Column(db.TIMESTAMP, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
-    movie_ratings = db.Column(db.JSON, default={})  # JSON column for storing movie ratings
+    liked_movies = db.Column(db.JSON, default=[])
+    disliked_movies = db.Column(db.JSON, default=[])
 
     # Define relationship to User
     user = db.relationship('User', backref=db.backref('preferences', lazy=True))

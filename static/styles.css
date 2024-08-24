@@ -160,3 +160,37 @@ footer {
     padding: 3px 5px;
 }
 
+/* Category Links Container */
+.category-links {
+    display: flex;
+    justify-content: space-around; /* Align items evenly */
+    flex-wrap: wrap; /* Allow items to wrap to new lines if necessary */
+    padding: 20px;
+    background-color: #444; /* Background color for the container */
+}
+
+/* Category Link Items */
+.category-links a {
+    text-align: center;
+    color: #fff; /* White text color */
+    text-decoration: none; /* Remove underline from links */
+    margin: 10px; /* Space around each link */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Category Link Images */
+.category-links img {
+    width: 100px; /* Adjust size as needed */
+    height: auto;
+    display: block;
+    margin-bottom: 10px; /* Space between image and text */
+}
+
+/* Category Link Text */
+.category-links p {
+    margin: 0; /* Remove default margin */
+    font-size: 1em; /* Adjust text size as needed */
+}
+

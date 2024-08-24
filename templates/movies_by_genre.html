@@ -3,17 +3,29 @@
 {% block title %}Movies by Genre - ScreenSort{% endblock %}
 
 {% block content %}
-    <h1>Movies in the Selected Genre</h1>
-    <ul>
+    <h1>Recommendations for {{ genre_name }} Films</h1>
+    <div class="movies-container">
         {% if movies %}
             {% for movie in movies %}
-                <li>{{ movie['title'] }} ({{ movie['release_date'] }}) - Rating: {{ movie['vote_average'] }}</li>
-            {% else %}
-                <li>No movies found for this genre.</li>
+                <div class="movie-card">
+                    <h3>{{ movie['title'] }}</h3>
+                    <img src="https://image.tmdb.org/t/p/w500{{ movie['poster_path'] }}" alt="{{ movie['title'] }} Poster">
+                    <div class="movie-details">
+                        <span class="age-rating">{{ movie['age_rating'] }}</span>
+                        <span class="user-rating">{{ movie['vote_average'] }}/10</span>
+                    </div>
+                    <form method="POST" action="{{ url_for('thumbs_action') }}">
+                        <input type="hidden" name="movie_id" value="{{ movie['id'] }}">
+                        <input type="hidden" name="redirect_url" value="{{ request.url }}">
+                        <input type="hidden" name="genre_id" value="{{ genre_id }}">
+                        <button type="submit" name="action" value="thumbs_up">👍</button>
+                        <button type="submit" name="action" value="thumbs_down">👎</button>
+                    </form>
+                </div>
             {% endfor %}
         {% else %}
-            <li>No movies found for this genre.</li>
+            <p>No movies found for this genre.</p>
         {% endif %}
-    </ul>
+    </div>
     <a href="{{ url_for('home') }}">Back to Home</a>
 {% endblock %}
