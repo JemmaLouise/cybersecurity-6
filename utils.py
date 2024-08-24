@@ -24,5 +24,5 @@ def get_genre_name(genre_id):
 
 
 # Filter out disliked movies
-def filter_disliked_movies(movies, disliked_movies):
-    return [movie for movie in movies if movie['id'] not in disliked_movies]
+def filter_disliked_movies(movies, disliked_movie_ids):
+    return [movie for movie in movies if movie['id'] not in disliked_movie_ids]

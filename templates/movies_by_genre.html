@@ -16,6 +16,8 @@
                     </div>
                     <form method="POST" action="{{ url_for('thumbs_action') }}">
                         <input type="hidden" name="movie_id" value="{{ movie['id'] }}">
+                        <input type="hidden" name="redirect_url" value="{{ request.url }}">
+                        <input type="hidden" name="genre_id" value="{{ genre_id }}">
                         <button type="submit" name="action" value="thumbs_up">👍</button>
                         <button type="submit" name="action" value="thumbs_down">👎</button>
                     </form>

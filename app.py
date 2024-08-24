@@ -28,21 +28,27 @@ def load_user(user_id):
 def home():
     print("TMDB API Key:", current_app.config['TMDB_API_KEY'])  # For debugging
 
-    # Fetch the user's disliked movies from preferences
+    # Fetch the user's current preferences
     user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+
+    # Initialize sets for disliked and liked movies
     disliked_movies = set()
-    if user_pref and user_pref.movie_ratings:
-        disliked_movies = set(int(movie_id) for movie_id, rating in user_pref.movie_ratings.items() if rating == 'thumbs_down')
+    liked_movies = set()
+
+    # If user preferences are available, populate disliked and liked movies
+    if user_pref:
+        # Convert comma-separated strings to sets, or default to empty set if None
+        disliked_movies = set(map(int, user_pref.disliked_movies.split(','))) if user_pref.disliked_movies else set()
+        liked_movies = set(map(int, user_pref.liked_movies.split(','))) if user_pref.liked_movies else set()
 
     # Fetch trending movies
     trending_movies = get_trending_movies()
 
     # Filter out disliked movies
-    trending_movies = filter_disliked_movies(trending_movies, disliked_movies)
+    trending_movies = [movie for movie in trending_movies if movie['id'] not in disliked_movies]
 
     print(trending_movies)  # Print the result for debugging
     return render_template('home.html', trending_movies=trending_movies)
-
 
 
 # Saves registration to the database
@@ -80,21 +86,57 @@ def login():
 @app.route('/thumbs_action', methods=['POST'])
 @login_required
 def thumbs_action():
-    movie_id = int(request.form.get('movie_id'))
+    movie_id = request.form.get('movie_id')
     action = request.form.get('action')
+    genre_id = request.form.get('genre_id')
+    age_rating = request.form.get('age_rating')
+    min_rating = request.form.get('min_rating')
+    redirect_url = request.form.get('redirect_url', url_for('home'))  # Default to home if no redirect URL is provided
 
+    if not movie_id or not action:
+        flash('Invalid action or movie ID.', 'danger')
+        return redirect(redirect_url)
+
+    # Convert movie_id to integer
+    movie_id = int(movie_id)
+
+    # Fetch or create user preferences
     user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+    if not user_pref:
+        user_pref = UserPreferences(user_id=current_user.id, disliked_movies='', liked_movies='')
+        db.session.add(user_pref)
 
-    if action == 'thumbs_down':
-        # Update movie ratings in the SQL database
-        if user_pref:
-            movie_ratings = user_pref.movie_ratings or {}
-            movie_ratings[str(movie_id)] = 'thumbs_down'
-            user_pref.movie_ratings = movie_ratings
-            db.session.commit()
-            flash(f'You disliked movie with ID {movie_id}. It has been recorded.', 'info')
+    # Update the liked or disliked movies
+    if action == 'thumbs_up':
+        liked_movies = set(user_pref.liked_movies.split(',')) if user_pref.liked_movies else set()
+        liked_movies.add(movie_id)
+        user_pref.liked_movies = ','.join(map(str, liked_movies))
+        # Optionally, remove from disliked_movies if it exists
+        disliked_movies = set(user_pref.disliked_movies.split(',')) if user_pref.disliked_movies else set()
+        disliked_movies.discard(movie_id)
+        user_pref.disliked_movies = ','.join(map(str, disliked_movies))
+    elif action == 'thumbs_down':
+        disliked_movies = set(user_pref.disliked_movies.split(',')) if user_pref.disliked_movies else set()
+        disliked_movies.add(movie_id)
+        user_pref.disliked_movies = ','.join(map(str, disliked_movies))
+        # Optionally, remove from liked_movies if it exists
+        liked_movies = set(user_pref.liked_movies.split(',')) if user_pref.liked_movies else set()
+        liked_movies.discard(movie_id)
+        user_pref.liked_movies = ','.join(map(str, liked_movies))
 
-    return redirect(url_for('home'))
+    db.session.commit()
+    flash('Action recorded successfully!', 'success')
+
+    # Redirect to the appropriate page based on parameters
+    if genre_id:
+        return redirect(url_for('movies_by_genre', genre_id=genre_id))
+    elif age_rating:
+        return redirect(url_for('movies_by_age', age_rating=age_rating))
+    elif min_rating:
+        return redirect(url_for('movies_by_rating', min_rating=min_rating))
+    else:
+        return redirect(url_for('home'))
+
 
 
 # Information about the website
@@ -164,6 +206,13 @@ def profile():
     # Fetch the user's current preferences
     user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
 
+    print(f"user_pref: {user_pref}")
+    if user_pref:
+        genre_id = str(user_pref.genre_id)
+        print(f"genre_id: {user_pref.genre_id}")
+    else:
+        genre_id = None
+
     # Determine the genre name based on the genre_id
     genre_names = {
         "28": "Action",
@@ -187,7 +236,7 @@ def profile():
     }
 
     # Get the genre name or default to 'Not Set'
-    preferred_genre_name = genre_names.get(user_pref.genre_id, 'Not Set') if user_pref else 'Not Set'
+    preferred_genre_name = genre_names.get(genre_id, 'Not Set') if user_pref else 'Not Set'
 
     return render_template('profile.html', user_pref=user_pref, preferred_genre_name=preferred_genre_name)
 
@@ -203,9 +252,9 @@ def recommendations(movie_id):
     # Fetch the user's disliked movies
     user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
     disliked_movies = set()
-    if user_pref and user_pref.movie_ratings:
+    if user_pref and user_pref.min_rating:
         disliked_movies = set(
-            int(movie_id) for movie_id, rating in user_pref.movie_ratings.items() if rating == 'thumbs_down')
+            int(movie_id) for movie_id, rating in user_pref.min_rating() if rating == 'thumbs_down')
 
     # Filter out disliked movies from recommendations
     recommendations = filter_disliked_movies(recommendations, disliked_movies)
@@ -217,29 +266,37 @@ def recommendations(movie_id):
 @app.route('/movies_by_genre', methods=['GET', 'POST'])
 @login_required
 def movies_by_genre():
+    genre_id = request.args.get('genre_id')  # Get genre_id from query parameters
+
     if request.method == 'POST':
         genre_id = request.form.get('genre_id')
         if not genre_id:
             flash('Please select a genre.', 'warning')
             return redirect(url_for('movies_by_genre'))
 
-        movies = get_movies_by_genre(genre_id)
+    if not genre_id:
+        return render_template('genre_input.html')
 
-        # Fetch the user's disliked movies
-        user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
-        disliked_movies = set()
-        if user_pref and user_pref.movie_ratings:
-            disliked_movies = set(int(movie_id) for movie_id, rating in user_pref.movie_ratings.items() if rating == 'thumbs_down')
+    # Fetch movies based on genre
+    movies = get_movies_by_genre(genre_id)
 
-        # Filter out disliked movies
-        movies = filter_disliked_movies(movies, disliked_movies)
+    # Fetch the user's disliked and liked movies
+    user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+    disliked_movies = set()
+    liked_movies = set()
+    if user_pref:
+        disliked_movies = set(map(int, user_pref.disliked_movies.split(','))) if user_pref.disliked_movies else set()
+        liked_movies = set(map(int, user_pref.liked_movies.split(','))) if user_pref.liked_movies else set()
 
-        # Fetch the genre name
-        genre_name = get_genre_name(genre_id)
-        movies_genre = get_movies_by_genre(genre_id)
+    # Filter out disliked movies
+    movies = [movie for movie in movies if movie['id'] not in disliked_movies]
 
-        return render_template('movies_by_genre.html', movies=movies, genre_name=genre_name, movies_genre=movies_genre)
-    return render_template('genre_input.html')
+    # Fetch the genre name
+    genre_name = get_genre_name(genre_id)
+
+    return render_template('movies_by_genre.html', movies=movies, genre_name=genre_name, genre_id=genre_id)
+
+
 
 
 
@@ -247,6 +304,8 @@ def movies_by_genre():
 @app.route('/movies_by_rating', methods=['GET', 'POST'])
 @login_required
 def movies_by_rating():
+    min_rating = request.args.get('min_rating')  # Get min_rating from query parameters
+
     if request.method == 'POST':
         min_rating = request.form.get('min_rating')
         if min_rating:
@@ -256,45 +315,64 @@ def movies_by_rating():
                 flash('Invalid rating value', 'danger')
                 return redirect(url_for('movies_by_rating'))
 
-            movies = get_movies_by_rating(min_rating)
+        if not min_rating:
+            flash('Please provide a rating.', 'warning')
+            return redirect(url_for('movies_by_rating'))
 
-            # Fetch the user's disliked movies
-            user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
-            disliked_movies = set()
-            if user_pref and user_pref.movie_ratings:
-                disliked_movies = set(int(movie_id) for movie_id, rating in user_pref.movie_ratings.items() if rating == 'thumbs_down')
+    if not min_rating:
+        return render_template('rating_input.html')
 
-            # Filter out disliked movies
-            movies = filter_disliked_movies(movies, disliked_movies)
+    # Fetch movies based on rating
+    movies = get_movies_by_rating(min_rating)
 
-            return render_template('movies_by_rating.html', movies=movies, min_rating=min_rating)
-        flash('Please provide a rating.', 'warning')
-        return redirect(url_for('movies_by_rating'))
-    return render_template('rating_input.html')
+    # Fetch the user's disliked and liked movies
+    user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+    disliked_movies = set()
+    liked_movies = set()
+    if user_pref:
+        disliked_movies = set(map(int, user_pref.disliked_movies.split(','))) if user_pref.disliked_movies else set()
+        liked_movies = set(map(int, user_pref.liked_movies.split(','))) if user_pref.liked_movies else set()
+
+    # Filter out disliked movies
+    movies = [movie for movie in movies if movie['id'] not in disliked_movies]
+
+    return render_template('movies_by_rating.html', movies=movies, min_rating=min_rating)
+
+
 
 
 # See recommendations for a particular age rating
 @app.route('/movies_by_age', methods=['GET', 'POST'])
 @login_required
 def movies_by_age():
+    age_rating = request.args.get('age_rating')  # Get age_rating from query parameters
+
     if request.method == 'POST':
         age_rating = request.form.get('age_rating')
-        if age_rating:
-            movies = get_movies_by_age(age_rating)
+        if not age_rating:
+            flash('Please provide an age rating.', 'warning')
+            return redirect(url_for('movies_by_age'))
 
-            # Fetch the user's disliked movies
-            user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
-            disliked_movies = set()
-            if user_pref and user_pref.movie_ratings:
-                disliked_movies = set(int(movie_id) for movie_id, rating in user_pref.movie_ratings.items() if rating == 'thumbs_down')
+    if not age_rating:
+        return render_template('age_input.html')
 
-            # Filter out disliked movies
-            movies = filter_disliked_movies(movies, disliked_movies)
+    # Fetch movies based on age rating
+    movies = get_movies_by_age(age_rating)
 
-            return render_template('movies_by_age.html', movies=movies, age_rating=age_rating)
-        flash('Please provide an age rating.', 'warning')
-        return redirect(url_for('movies_by_age'))
-    return render_template('age_input.html')
+    # Fetch the user's disliked and liked movies
+    user_pref = UserPreferences.query.filter_by(user_id=current_user.id).first()
+    disliked_movies = set()
+    liked_movies = set()
+    if user_pref:
+        disliked_movies = set(map(int, user_pref.disliked_movies.split(','))) if user_pref.disliked_movies else set()
+        liked_movies = set(map(int, user_pref.liked_movies.split(','))) if user_pref.liked_movies else set()
+
+    # Filter out disliked movies
+    movies = [movie for movie in movies if movie['id'] not in disliked_movies]
+
+    return render_template('movies_by_age.html', movies=movies, age_rating=age_rating)
+
+
 
 
 
@@ -330,5 +408,9 @@ def load_user(user_id):
         return jsonify({'error': 'User not found'}), 404
 
 
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+
+
