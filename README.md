@@ -1,4 +1,4 @@
-# Movie Recommendation System
+# ScreenSort: Movie Recommendation System
 ## Overview
 ScreenSort, A Movie Recommendation System, is a Python-based application that provides personalised movie suggestions to users based on their viewing history and preferences. The system utilizes data from The Movie Database (TMDb) API and incorporates machine learning techniques to recommend movies that align with user tastes.
 
