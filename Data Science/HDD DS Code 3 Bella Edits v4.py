@@ -23,6 +23,13 @@ from flask_restful import Api, Resource
 from flask_cors import CORS # type: ignore
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+#import modules for SQLAlchemy db with csv files 
+from numpy import genfromtxt
+from time import time
+from sqlalchemy import Column, Integer, Float, Date
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 #Step 1: Create SQLAlchemy Model
 
@@ -87,15 +94,6 @@ movie_schema = MovieSchema(strict=True)
 movies_schema = MovieSchema(many=True, strict=True)
 
 # Step 2: Load data from CSV files to db
-
-#import modules for SQLAlchemy db with csv files 
-import pandas as pd
-from numpy import genfromtxt
-from time import time
-from sqlalchemy import Column, Integer, Float, Date
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 #create function for loading data from csv files
 def Load_Data(file_name):
