@@ -159,7 +159,7 @@ try:
    s.add(record) #Add all the records
 
    s.commit() #Attempt to commit all the records
-    except:
+except:
         s.rollback() #Rollback the changes on error
         
 try:
@@ -265,9 +265,8 @@ except:
     s.rollback() #Rollback the changes on error
 
 try:
-               
-    file_name9= r"datasets\rottentomatoes\rotten_tomatoes_top_movies_2019-01-15.csv" 
-    data9 = Load_Data(file_name9)
+     file_name9= r"datasets\rottentomatoes\rotten_tomatoes_top_movies_2019-01-15.csv" 
+     data9 = Load_Data(file_name9)
 
     for i in data9:
         record = movieDatabase(**{
