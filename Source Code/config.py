@@ -5,3 +5,10 @@ class Config:
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://user:password@localhost/movies'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     TMDB_API_KEY = os.environ.get('TMDB_API_KEY') or '5609df2250e4c3355f12c198f1353ca6'
+    
+    # MySQL connection parameters for ML database
+    db_username = "Your Username"
+    db_password = "Your Password"
+    db_host = "localhost"
+    db_port = 800
+    db_name = 'moviesdataconcat'
