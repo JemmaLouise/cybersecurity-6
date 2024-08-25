@@ -139,135 +139,153 @@ if __name__ == "__main__":
     s = session()
 
      #load csv data into SQLAlchemy model using LoadData function
-    try:
-        file_name1 = r"datasets\40yrskaggle\movies.csv"
-        data = Load_Data(file_name1)
-        print (data)
-        for a in data:
-            record = movieDatabase(**{
-                'title':a[0],
-                'ageRating' : a[1],
-                'genres' : a[2],
-                'releaseDate' : a[3],
-                'ratingavgscore' : a[4],
-                'votes' : a[5],
-                'director':a[6],
-                'actors' : a[8],
-                'company' : a[12],
-                'runtime' : a[13],
-                
-            })
-            s.add(record) #Add all the records
+try:
+     file_name1 = r"datasets\40yrskaggle\movies.csv"
+     data1 = Load_Data(file_name1)
+     for a in data1:
+       record = moviedatabase(**{
+           'title':a[0],
+           'ageRating' : a[1],
+           'genres' : a[2],
+           'releaseDate' : a[3],
+           'ratingavgscore' : a[4],
+           'votes' : a[5],
+           'director':a[6],
+           'actors' : a[8],
+           'company' : a[12],
+           'runtime' : a[13],
+                   
+       })
+   s.add(record) #Add all the records
 
-        s.commit() #Attempt to commit all the records
-        
-        file_name2 = r"datasets\imdb\title.basics.tsv\title.basics.tsv" 
-        data = Load_Data(file_name2)
-
-        for b in data:
-            record = movieDatabase(**{
-                'movie_id': b[0],
-                'title':b[2],
-                'isAdult' : b[4],
-                'genres' : b[8],
-                'runtime' : b[7],
-            })
-            s.add(record) #Add all the records
-
-        s.commit() #Attempt to commit all the records
-    
-   
-        file_name3 = r"datasets\imdb\title.ratings.tsv\title.ratings.tsv" 
-        data = Load_Data(file_name3)
-
-        for c in data:
-            record = movieDatabase(**{
-                'ratingavgscore':c[2],
-                'votes' : c[3],
-                'movie_id' : c[0],
-            })
-            s.add(record) #Add all the records
-
-        s.commit() #Attempt to commit all the records
-
-        
-        file_name4 = r"datasets/movielens/ml-latest-small/ml-latest-small/movies.csv"
-        data = Load_Data(file_name4)
-
-        for d in data:
-            record = movieDatabase(**{
-                'title':d[1],
-                'genres' : d[2],
-                'movie_id' : d[0],
-            })
-            s.add(record) #Add all the records
-
-        s.commit() #Attempt to commit all the records
-    
-        file_name5 = r"datasets\movielens\ml-latest-small\ml-latest-small\ratings.csv"
-        data = Load_Data(file_name5)
-
-        for e in data:
-            record = movieDatabase(**{
-                'ratingavgscore':e[2],
-                'movie_id' : e[1],
-            })
-            s.add(record) #Add all the records
-
-            s.commit() #Attempt to commit all the records
-
-    
-    
-        file_name6 = r"datasets/movielens/ml-latest-small/ml-latest-small/tags.csv"
-        data = Load_Data(file_name6)
-
-        for f in data:
-            record = movieDatabase(**{
-                'tags':f[2],
-                'movie_id' : f[1],
-            })
-            s.add(record) #Add all the records
-
-        s.commit() #Attempt to commit all the records
-    
-    
-        file_name8 = r"datasets\netflix\netflix_movies_and_tv_shows_sample_dataset_sample.csv" 
-        data = Load_Data(file_name8)
-
-        for h in data:
-            record = movieDatabase(**{
-                'title':h[1],
-                'ageRating' : h[4],
-                'genres' : h[5],
-                'director':h[10],
-                'actors' : h[9],
-                'overview': h[3],
-                'movie_id': h[19],
-                
-            })
-            s.add(record) #Add all the records
-
-        s.commit() #Attempt to commit all the records
-            
-        file_name9= r"datasets\rottentomatoes\rotten_tomatoes_top_movies_2019-01-15.csv" 
-        data = Load_Data(file_name9)
-
-        for i in data:
-            record = movieDatabase(**{
-                'title':i[1],
-                'ratingavgscore' : i[2],
-                'votes' : i[3],
-                'genres':i[4],
-                
-            })
-            s.add(record) #Add all the records
-
-        s.commit() #Attempt to commit all the records 
-        
+   s.commit() #Attempt to commit all the records
     except:
         s.rollback() #Rollback the changes on error
-    finally:
-        s.close() #Close the connection
+        
+try:
+    file_name2 = r"datasets\imdb\title.basics.tsv\title.basics.tsv" 
+    data2 = Load_Data(file_name2)
+
+    for b in data2:
+        record = movieDatabase(**{
+            'movie_id': b[0],
+            'title':b[2],
+            'isAdult' : b[4],
+            'genres' : b[8],
+            'runtime' : b[7],
+        })
+        s.add(record) #Add all the records
+
+        s.commit() #Attempt to commit all the records
+except:
+    s.rollback() #Rollback the changes on error
+        
+try:
+    file_name3 = r"datasets\imdb\title.ratings.tsv\title.ratings.tsv" 
+    data3 = Load_Data(file_name3)
+
+    for c in data3:
+        record = movieDatabase(**{
+            'ratingavgscore':c[2],
+            'votes' : c[3],
+            'movie_id' : c[0],
+        })
+        s.add(record) #Add all the records
+
+    s.commit() #Attempt to commit all the records
+except:
+    s.rollback() #Rollback the changes on error
+        
+try:
+    file_name4 = r"datasets/movielens/ml-latest-small/ml-latest-small/movies.csv"
+    data4 = Load_Data(file_name4)
+
+    for d in data4:
+        record = movieDatabase(**{
+            'title':d[1],
+            'genres' : d[2],
+            'movie_id' : d[0],
+        })
+        s.add(record) #Add all the records
+
+    s.commit() #Attempt to commit all the records
+except:
+    s.rollback() #Rollback the changes on error
+  
+try:      
+    file_name5 = r"datasets\movielens\ml-latest-small\ml-latest-small\ratings.csv"
+    data5 = Load_Data(file_name5)
+
+    for e in data5:
+        record = movieDatabase(**{
+            'ratingavgscore':e[2],
+            'movie_id' : e[1],
+        })
+        s.add(record) #Add all the records
+
+        s.commit() #Attempt to commit all the records
+except:
+    s.rollback() #Rollback the changes on error
+        
+
+try:
+    file_name6 = r"datasets/movielens/ml-latest-small/ml-latest-small/tags.csv"
+    data6 = Load_Data(file_name6)
+
+    for f in data6:
+        record = movieDatabase(**{
+            'tags':f[2],
+            'movie_id' : f[1],
+        })
+        s.add(record) #Add all the records
+
+        s.commit() #Attempt to commit all the records
+except:
+    s.rollback() #Rollback the changes on error
+        
+try:
+    file_name8 = r"datasets\netflix\netflix_movies_and_tv_shows_sample_dataset_sample.csv" 
+    data8 = Load_Data(file_name8)
+
+    for h in data8:
+        record = movieDatabase(**{
+            'title':h[1],
+            'ageRating' : h[4],
+            'genres' : h[5],
+            'director':h[10],
+            'actors' : h[9],
+            'overview': h[3],
+            'movie_id': h[19],
+            
+        })
+        s.add(record) #Add all the records
+
+        s.commit() #Attempt to commit all the records
+except:
+    s.rollback() #Rollback the changes on error
+
+try:
+               
+    file_name9= r"datasets\rottentomatoes\rotten_tomatoes_top_movies_2019-01-15.csv" 
+    data9 = Load_Data(file_name9)
+
+    for i in data9:
+        record = movieDatabase(**{
+            'title':i[1],
+            'ratingavgscore' : i[2],
+            'votes' : i[3],
+            'genres':i[4],
+            
+        })
+        s.add(record) #Add all the records
+
+        s.commit() #Attempt to commit all the records 
+except:
+    s.rollback() #Rollback the changes on error
+    
+finally:
+    s.close() #Close the connection
+
 
 
 
