@@ -607,6 +607,13 @@ def personalized_recommendations(time_of_day, df, cosine_sim):
 print("Personalized Recommendations (Evening):")
 print(personalized_recommendations("evening", movie_df, cosine_sim))
 
+@app.route('/handle_post', methods=['POST'])
+def handle_post():
+    if request.method == 'POST':
+        request.form.get('movie_id')
+        return (hybrid_recommendation(f'title', movie_df, cosine_sim))
+
+
 if __name__ == " __main__":
     app.run(debug=True)
     
