@@ -2,22 +2,25 @@
 import pandas as pd
 import requests
 import re
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import LabelEncoder
 from nltk.sentiment import SentimentIntensityAnalyzer
 from sqlalchemy import create_engine, ForeignKey, Column, MetaData, String, Integer, CHAR 
 from sqlalchemy import text
-from surprise import Dataset, Reader, SVD
+from surprise import Dataset, Reader
+from surprise import SVD
 import os
 from pandas import api
-import matplotlib.pyplot as mpl
+import matplotlib.pyplot as plt
 import seaborn as sns
 from flask import Flask, jsonify
 from flask_restful import Api, Resource
-from flask_cors import CORS
+from flask_cors import CORS # type: ignore
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
@@ -77,7 +80,7 @@ def __init__(self, id, movie_id, yrmade, votes, title, overview, tags, genres, a
         
 class MovieSchema(ma.Schema):
     class Meta:
-        fields = (id, movie_id, yrmade, votes, title, overview, tags, genres, actors, isAdult, company, ageRating, runtime, ratingavgscore)
+        fields = (id, movie_id, yrmade, votes, title, overview, tags, genres, actors, isAdult, company, ageRating, runtime, ratingavgscore) # type: ignore
 
 #initialise Schema 
 movie_schema = MovieSchema(strict=True)
@@ -138,131 +141,129 @@ if __name__ == "__main__":
     s = session()
 
     try:
-        file_name1 = "C:\Users\Bella\.vscode\nf\groupprojectcfg\datasets\40yrskaggle\movies.csv"
+        file_name1 = r"datasets\40yrskaggle\movies.csv"
         data = Load_Data(file_name1)
-
+        print (data)
         for a in data:
             record = movieDatabase(**{
-                'title':i[0],
-                'ageRating' : i[1],
-                'genres' : i[2],
-                'releaseDate' : i[3],
-                'ratingavgscore' : i[4],
-                'votes' : i[5],
-                'director':i[6],
-                'actors' : i[8],
-                'company' : i[12],
-                'runtime' : i[13],
+                'title':a[0],
+                'ageRating' : a[1],
+                'genres' : a[2],
+                'releaseDate' : a[3],
+                'ratingavgscore' : a[4],
+                'votes' : a[5],
+                'director':a[6],
+                'actors' : a[8],
+                'company' : a[12],
+                'runtime' : a[13],
                 
             })
             s.add(record) #Add all the records
 
         s.commit() #Attempt to commit all the records
         
-        file_name2 = "C:\Users\Bella\.vscode\nf\groupprojectcfg\datasets\imdb\title.basics.tsv\title.basics.tsv" 
+        file_name2 = r"datasets\imdb\title.basics.tsv\title.basics.tsv" 
         data = Load_Data(file_name2)
 
         for b in data:
             record = movieDatabase(**{
-                'movie_id': i[0],
-                'title':i[2],
-                'isAdult' : i[4],
-                'genres' : i[8],
-                'runtime' : i[7],
+                'movie_id': b[0],
+                'title':b[2],
+                'isAdult' : b[4],
+                'genres' : b[8],
+                'runtime' : b[7],
             })
             s.add(record) #Add all the records
 
         s.commit() #Attempt to commit all the records
     
    
-        file_name3 = "C:\Users\Bella\.vscode\nf\groupprojectcfg\datasets\imdb\title.ratings.tsv\title.ratings.tsv" 
+        file_name3 = r"datasets\imdb\title.ratings.tsv\title.ratings.tsv" 
         data = Load_Data(file_name3)
 
         for c in data:
             record = movieDatabase(**{
-                'ratingavgscore':i[2],
-                'votes' : i[3],
-                'movie_id' : i[0],
+                'ratingavgscore':c[2],
+                'votes' : c[3],
+                'movie_id' : c[0],
             })
             s.add(record) #Add all the records
 
         s.commit() #Attempt to commit all the records
 
         
-        file_name4 = "C:\Users\Bella\.vscode\nf\groupprojectcfg\datasets\movielens\ml-latest-small\ml-latest-small\movies.csv"
+        file_name4 = r"datasets/movielens/ml-latest-small/ml-latest-small/movies.csv"
         data = Load_Data(file_name4)
 
         for d in data:
             record = movieDatabase(**{
-                'title':i[1],
-                'genres' : i[2],
-                'movie_id' : i[0],
+                'title':d[1],
+                'genres' : d[2],
+                'movie_id' : d[0],
             })
             s.add(record) #Add all the records
 
         s.commit() #Attempt to commit all the records
     
-    file_name5 = "C:\Users\Bella\.vscode\nf\groupprojectcfg\datasets\movielens\ml-latest-small\ml-latest-small\ratings.csv"
-    data = Load_Data(file_name5)
+        file_name5 = r"datasets\movielens\ml-latest-small\ml-latest-small\ratings.csv"
+        data = Load_Data(file_name5)
 
         for e in data:
             record = movieDatabase(**{
-                'ratingavgscore':i[2],
-                'movie_id' : i[1],
+                'ratingavgscore':e[2],
+                'movie_id' : e[1],
             })
             s.add(record) #Add all the records
 
-        s.commit() #Attempt to commit all the records
+            s.commit() #Attempt to commit all the records
 
-   
-   
-    file_name6 = "C:\Users\Bella\.vscode\nf\groupprojectcfg\datasets\movielens\ml-latest-small\ml-latest-small\tags.csv"
-    data = Load_Data(file_name6)
+    
+    
+        file_name6 = r"datasets/movielens/ml-latest-small/ml-latest-small/tags.csv"
+        data = Load_Data(file_name6)
 
         for f in data:
             record = movieDatabase(**{
-                'tags':i[2],
-                'movie_id' : i[1],
+                'tags':f[2],
+                'movie_id' : f[1],
             })
             s.add(record) #Add all the records
 
         s.commit() #Attempt to commit all the records
-   
-   
-  
-   
-    file_name8 = "C:\Users\Bella\.vscode\nf\groupprojectcfg\datasets\netflix\netflix_movies_and_tv_shows_sample_dataset_sample.csv" 
-    data = Load_Data(file_name8)
+    
+    
+        file_name8 = r"datasets\netflix\netflix_movies_and_tv_shows_sample_dataset_sample.csv" 
+        data = Load_Data(file_name8)
 
         for h in data:
             record = movieDatabase(**{
-                'title':i[1],
-                'ageRating' : i[4],
-                'genres' : i[5],
-                'director':i[10],
-                'actors' : i[9],
-                'overview': i[3],
-                'movie_id': i[19],
+                'title':h[1],
+                'ageRating' : h[4],
+                'genres' : h[5],
+                'director':h[10],
+                'actors' : h[9],
+                'overview': h[3],
+                'movie_id': h[19],
                 
             })
             s.add(record) #Add all the records
 
         s.commit() #Attempt to commit all the records
-        
-    file_name9= "C:\Users\Bella\.vscode\nf\groupprojectcfg\datasets\rottentomatoes\rotten_tomatoes_top_movies_2019-01-15.csv" 
-    data = Load_Data(file_name9)
-
-    for i in data:
-        record = movieDatabase(**{
-            'title':i[1],
-            'ratingavgscore' : i[2],
-            'votes' : i[3],
-            'genres':i[4],
             
-        })
-        s.add(record) #Add all the records
+        file_name9= r"datasets\rottentomatoes\rotten_tomatoes_top_movies_2019-01-15.csv" 
+        data = Load_Data(file_name9)
 
-    s.commit() #Attempt to commit all the records 
+        for i in data:
+            record = movieDatabase(**{
+                'title':i[1],
+                'ratingavgscore' : i[2],
+                'votes' : i[3],
+                'genres':i[4],
+                
+            })
+            s.add(record) #Add all the records
+
+        s.commit() #Attempt to commit all the records 
         
     except:
         s.rollback() #Rollback the changes on error
@@ -360,7 +361,7 @@ def get(self, user_id):
             genres = user_df['genre'].tolist()
             
             # Create a test set for the given user ID
-            test_set = [[user_id, movietitle, 0] for movietitle in moviedata]
+            test_set = [[user_id, movietitle, 0] for movietitle in data]
 
             # Predict ratings for the test set
             predictions = model.test(test_set)
@@ -378,18 +379,18 @@ def get(self, user_id):
     # Function to fetch category name based on movie ID
 def get_moviename(self, movie_id):
         # Convert movie_id to a regular Python integer
-       movie_id = int(movie_id)
+    movie_id = int(movie_id)
         
         # Connect to the database
-        engine = create_engine(f"mysql+mysqlconnector://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}")
+    engine = create_engine(f"mysql+mysqlconnector://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}")
         
         # Establish a connection
-        connection = engine.connect()
+    connection = engine.connect()
         
         # Query to fetch movie name based on movie ID
-        query = text("SELECT title FROM moviedata WHERE movie_id = movie_id")
+    query = text("SELECT title FROM moviedata WHERE movie_id = movie_id")
         
-        try:
+    try:
             # Bind the movie_id parameter to the query
             query = query.bindparams(movie_id=movie_id)
             
@@ -402,7 +403,7 @@ def get_moviename(self, movie_id):
                 return movie_name
             else:
                 return "Unknown "  # Return a default value if genre name is not found
-        finally:
+    finally:
             # Close the connection
             connection.close()
         # Endpoint to get recommendations for a given movie_ID:
@@ -541,7 +542,7 @@ def get_recommendations(title, cosine_sim=cosine_sim):
     return movie_df['title'].iloc[movie_indices]
 
 # Recommend movies similar to a specific movie
-print(get_recommendations(f'title'))
+print(get_recommendations(movie['title']))
 
 # Advanced Feature Engineering: Calculate average ratings considering Rotten Tomatoes and IMDb scores (if available)
 def calculate_combined_rating(row):
@@ -566,7 +567,7 @@ def hybrid_recommendation(title, df, cosine_sim):
 
 # Example usage
 print("Hybrid Recommendations with Cast Integration and Advanced Features:")
-print(hybrid_recommendation('title', movie_df, cosine_sim))
+print(hybrid_recommendation(f'title', movie_df, cosine_sim))
 
 # Step 7: Training and Evaluating a Machine Learning Model
 
