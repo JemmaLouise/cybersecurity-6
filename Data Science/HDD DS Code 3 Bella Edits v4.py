@@ -18,7 +18,7 @@ import os
 from pandas import api
 import matplotlib.pyplot as plt
 import seaborn as sns
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, requests
 from flask_restful import Api, Resource
 from flask_cors import CORS # type: ignore
 from flask_sqlalchemy import SQLAlchemy
