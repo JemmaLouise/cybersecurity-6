@@ -140,6 +140,7 @@ if __name__ == "__main__":
     session.configure(bind=engine)
     s = session()
 
+     #load csv data into SQLAlchemy model using LoadData function
     try:
         file_name1 = r"datasets\40yrskaggle\movies.csv"
         data = Load_Data(file_name1)
