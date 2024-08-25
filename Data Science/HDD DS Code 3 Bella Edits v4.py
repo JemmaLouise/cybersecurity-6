@@ -160,7 +160,7 @@ try:
 
    s.commit() #Attempt to commit all the records
 except:
-        s.rollback() #Rollback the changes on error
+     s.rollback() #Rollback the changes on error
         
 try:
     file_name2 = r"datasets\imdb\title.basics.tsv\title.basics.tsv" 
