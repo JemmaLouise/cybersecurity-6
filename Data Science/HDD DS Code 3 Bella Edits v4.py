@@ -298,7 +298,7 @@ db_username = "Your Username"
 db_password = "Your Password"
 db_host = "localhost"
 db_port = 800
-db_name = 'moviesdataconcat'
+db_name = "moviesdataconcat"
 
 # Define the SQL query 
 query = """
@@ -354,7 +354,7 @@ def get(self, user_id):
                 SELECT DISTINCT
                     movie_id
                 FROM 
-                    'moviedata' 
+                    moviedata
             """
             user_df = pd.read_sql_query(user_query, engine)
             genres = user_df['genre'].tolist()
@@ -616,18 +616,4 @@ def handle_post():
 if __name__ == " __main__":
     app.run(debug=True)
     
-#todolist: 
-#   integrate SQL database 
-#   clean/scrub dataset - get rid of duplicates by matching them up and enhancing the data
-#   integrate preferences data 
-#   use re module? 
-#   data engineering?
-#   plot graphs or something 
 
-# algo functionality:
-#   match up the SQL database with the API database 
-#       enrich the data quality by finding movieid in database from the APIs     
-#   take in preferences from the front end and use that to refine the dataset 
-#       (make smaller) shrink dataset to be searched
-#   output personalised recommendation
-#   endpoint
